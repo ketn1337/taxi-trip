@@ -1,0 +1,4 @@
+.env
+data/green_tripdata_2025-11.parquet
+data/yellow_tripdata_2025-11.parquet
+data/taxi_zone_lookup.csv

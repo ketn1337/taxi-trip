@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - airflow-net
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_log:/var/log/clickhouse-server
+    networks:
+      - airflow-net
+
+  airflow:
+    image: apache/airflow:2.10.1
+    container_name: airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: 'k7uGdJvK8zN5xW3qY2pLmR9sT1oP4iU7yX6cV8bN0aQ='
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
+    ports:
+      - "8080:8080"
+    command:
+      - bash
+      - -c
+      - |
+        set -e;
+        echo ">>> Installing dependencies...";
+        pip install --no-cache-dir pandas pyarrow psycopg2-binary;
+        echo ">>> Initializing Airflow DB...";
+        airflow db init;
+        echo ">>> Creating admin user if needed...";
+        if ! airflow users list | grep -q admin; then
+          airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com;
+        fi;
+        echo ">>> Starting scheduler in background...";
+        airflow scheduler > /tmp/scheduler.log 2>&1 &
+        SCHEDULER_PID=$!;
+        echo "Scheduler started with PID $$SCHEDULER_PID";
+        echo ">>> Starting webserver in foreground...";
+        exec airflow webserver --port 8080 --workers 1 --access-logfile - --error-logfile -
+    networks:
+      - airflow-net
+
+  superset:
+    image: apache/superset:3.0.0
+    container_name: superset
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://airflow:airflow@postgres:5432/superset"
+      SUPERSET_SECRET_KEY: "superset_secret"
+    ports:
+      - "8088:8088"
+    command: bash -c "
+        superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin
+        && superset db upgrade
+        && superset init
+        && superset run -h 0.0.0.0 -p 8088 --with-threads --reload
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - airflow-net
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  clickhouse_log:
+
+networks:
+  airflow-net:
+    name: airflow-superset-network
