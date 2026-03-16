@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: postgre
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -23,7 +21,7 @@ services:
 
   clickhouse:
     image: clickhouse/clickhouse-server:23.8
-    container_name: clickhouse
+    container_name: click
     ulimits:
       nofile:
         soft: 262144
@@ -39,7 +37,7 @@ services:
 
   airflow:
     image: apache/airflow:2.10.1
-    container_name: airflow
+    container_name: airflw
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,11 +47,11 @@ services:
       AIRFLOW__CORE__FERNET_KEY: 'k7uGdJvK8zN5xW3qY2pLmR9sT1oP4iU7yX6cV8bN0aQ='
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+      AIRFLOW_UID: ${AIRFLOW_UID}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
+    user: "${AIRFLOW_UID}:${AIRFLOW_GID}"
     ports:
       - "8080:8080"
     command:
@@ -62,7 +60,7 @@ services:
       - |
         set -e;
         echo ">>> Installing dependencies...";
-        pip install --no-cache-dir pandas pyarrow psycopg2-binary;
+        pip install --no-cache-dir pandas pyarrow psycopg2-binary airflow-clickhouse-plugin;
         echo ">>> Initializing Airflow DB...";
         airflow db init;
         echo ">>> Creating admin user if needed...";
@@ -80,7 +78,7 @@ services:
 
   superset:
     image: apache/superset:3.0.0
-    container_name: superset
+    container_name: superst
     environment:
       DATABASE_URL: "postgresql+psycopg2://airflow:airflow@postgres:5432/superset"
       SUPERSET_SECRET_KEY: "superset_secret"
