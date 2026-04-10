@@ -3,3 +3,4 @@ data/*.parquet
 data/*.csv
 airflow/logs
 airflow/dags/__pycache__
+airflow/dags/include/__pycache__

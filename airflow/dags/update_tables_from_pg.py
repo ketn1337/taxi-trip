@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow_clickhouse_plugin.operators.clickhouse import ClickHouseOperator
 from datetime import datetime
+from include.datasets import PG_TO_CLICK_YELLOW_DATASET, PG_TO_CLICK_GREEN_DATASET
+
 
 with DAG(
     dag_id='nrt_taxi_ingestion',
@@ -34,7 +36,9 @@ with DAG(
                 )
                 WHERE {time_column} >= '{{{{ data_interval_start.strftime('%Y-%m-%d %H:%M:%S') }}}}'
                 AND {time_column} <  '{{{{ data_interval_end.strftime('%Y-%m-%d %H:%M:%S') }}}}'
-            """
+            """,
+            outlets=[PG_TO_CLICK_YELLOW_DATASET, PG_TO_CLICK_GREEN_DATASET]
         )
+
         
         delete_last_hour >> load_data

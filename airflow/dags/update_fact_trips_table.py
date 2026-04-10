@@ -1,11 +1,13 @@
 from airflow import DAG
 from airflow_clickhouse_plugin.operators.clickhouse import ClickHouseOperator
 from datetime import datetime
+from include.datasets import PG_TO_CLICK_YELLOW_DATASET, PG_TO_CLICK_GREEN_DATASET, FACT_TABLE_DATASET
+
 
 with DAG(
     dag_id='fact_table_update',
     start_date=datetime(2023, 1, 1),
-    schedule_interval='@hourly', # Запуск в начале каждого часа
+    schedule_interval=[PG_TO_CLICK_YELLOW_DATASET, PG_TO_CLICK_GREEN_DATASET], # Запуск в начале каждого часа
     catchup=False,               # Не грузить исторические данные при активации
     max_active_runs=1            # Чтобы запуски не обгоняли друг друга
 ) as dag:
@@ -34,9 +36,11 @@ with DAG(
                 y.payment_type,
                 toDateTime(y.tpep_pickup_datetime) as pickup_datetime,
                 toDayOfMonth(pickup_datetime),
+                toDayOfWeek(pickup_datetime),
                 toHour(pickup_datetime),
                 toDateTime(y.tpep_dropoff_datetime) as dropoff_datetime,
                 toDayOfMonth(dropoff_datetime),
+                toDayOfWeek(dropoff_datetime),
                 toHour(dropoff_datetime),
                 y.passenger_count,
                 y.trip_distance,
@@ -70,9 +74,11 @@ with DAG(
                 g.payment_type,
                 toDateTime(g.lpep_pickup_datetime) as pickup_datetime,
                 toDayOfMonth(pickup_datetime),
+                toDayOfWeek(pickup_datetime),
                 toHour(pickup_datetime),
                 toDateTime(g.lpep_dropoff_datetime) as dropoff_datetime,
                 toDayOfMonth(dropoff_datetime),
+                toDayOfWeek(dropoff_datetime),
                 toHour(dropoff_datetime),
                 g.passenger_count,
                 g.trip_distance,
@@ -89,7 +95,8 @@ with DAG(
             FROM green_tripdata g
             WHERE pickup_datetime >= '{{ data_interval_start.strftime('%Y-%m-%d %H:%M:%S') }}'
               AND pickup_datetime <  '{{ data_interval_end.strftime('%Y-%m-%d %H:%M:%S') }}'
-        """
+        """,
+        outlets=[FACT_TABLE_DATASET]
     )
 
     delete_last_hour >> [update_yellow, update_green]
