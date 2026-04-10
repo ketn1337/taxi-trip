@@ -1,0 +1,125 @@
+dashboard_title: Financial performance
+description: null
+css: ''
+slug: null
+uuid: 7e1d97a3-07ed-4557-90dc-0c55551c96db
+position:
+  CHART--m8Uxfbh26Q:
+    children: []
+    id: CHART--m8Uxfbh26Q
+    meta:
+      chartId: 1
+      height: 50
+      sliceName: hourly_efficiency_yellow
+      uuid: 1f8b5e58-7531-4115-ad17-4c65bee93305
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-Wlr_XyaeNDK
+    type: CHART
+  CHART-9auPr6caLob:
+    children: []
+    id: CHART-9auPr6caLob
+    meta:
+      chartId: 2
+      height: 50
+      sliceName: hourly_efficiency_green
+      uuid: aa937c4a-0e25-4377-adb8-5dca8fe2f5e4
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-Wlr_XyaeNDK
+    type: CHART
+  CHART-WXggrR0IjuJ:
+    children: []
+    id: CHART-WXggrR0IjuJ
+    meta:
+      chartId: 4
+      height: 50
+      sliceName: profit_zones_yellow
+      uuid: 986cc564-c705-4469-9b73-055bc4281845
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-Wlr_XyaeNDK
+    type: CHART
+  CHART-krmRVoKaIkM:
+    children: []
+    id: CHART-krmRVoKaIkM
+    meta:
+      chartId: 3
+      height: 50
+      sliceName: profit_zones_green
+      uuid: e27e6b74-3889-4f66-be02-8799e29c35b1
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-fpzj47w38Ox
+    type: CHART
+  DASHBOARD_VERSION_KEY: v2
+  GRID_ID:
+    children:
+    - ROW-Wlr_XyaeNDK
+    - ROW-em9XklnV4e
+    id: GRID_ID
+    parents:
+    - ROOT_ID
+    type: GRID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: Financial Performance
+    type: HEADER
+  ROOT_ID:
+    children:
+    - GRID_ID
+    id: ROOT_ID
+    type: ROOT
+  ROW-Wlr_XyaeNDK:
+    children:
+    - CHART--m8Uxfbh26Q
+    - CHART-9auPr6caLob
+    id: ROW-Wlr_XyaeNDK
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+  ROW-em9XklnV4e:
+    children:
+    - CHART-WXggrR0IjuJ
+    - CHART-krmRVoKaIkM
+    id: ROW-em9XklnV4e
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: ROW
+metadata:
+  chart_configuration: {}
+  global_chart_configuration:
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    chartsInScope:
+    - 1
+    - 2
+    - 3
+    - 4
+  color_scheme: ''
+  refresh_frequency: 0
+  expanded_slices: {}
+  label_colors: {}
+  timed_refresh_immune_slices: []
+  cross_filters_enabled: true
+  default_filters: '{}'
+  shared_label_colors: {}
+  color_scheme_domain: []
+version: 1.0.0

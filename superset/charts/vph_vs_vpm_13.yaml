@@ -1,0 +1,89 @@
+slice_name: vph_vs_vpm
+description: null
+certified_by: null
+certification_details: null
+viz_type: bubble
+params:
+  datasource: 8__table
+  viz_type: bubble
+  entity: pickup_hour
+  x:
+    expressionType: SIMPLE
+    column:
+      advanced_data_type: null
+      changed_on: '2026-03-24T05:22:53.590340'
+      column_name: vpm
+      created_on: '2026-03-24T05:22:53.590338'
+      description: null
+      expression: null
+      extra: null
+      filterable: true
+      groupby: true
+      id: 55
+      is_active: true
+      is_dttm: false
+      python_date_format: null
+      type: NULLABLE(FLOAT64)
+      type_generic: null
+      uuid: 5d1497fc-714c-4f2b-a50e-1c479c89cc82
+      verbose_name: null
+    aggregate: AVG
+    sqlExpression: null
+    datasourceWarning: false
+    hasCustomLabel: false
+    label: AVG(vpm)
+    optionName: metric_qdzh1l167tr_lixg6p1ud8o
+  y:
+    expressionType: SIMPLE
+    column:
+      advanced_data_type: null
+      changed_on: '2026-03-24T05:22:53.590171'
+      column_name: vph
+      created_on: '2026-03-24T05:22:53.590169'
+      description: null
+      expression: null
+      extra: null
+      filterable: true
+      groupby: true
+      id: 54
+      is_active: true
+      is_dttm: false
+      python_date_format: null
+      type: NULLABLE(FLOAT64)
+      type_generic: null
+      uuid: a9c5895f-c967-4937-8698-18d5af7dccc3
+      verbose_name: null
+    aggregate: AVG
+    sqlExpression: null
+    datasourceWarning: false
+    hasCustomLabel: false
+    label: AVG(vph)
+    optionName: metric_du2t543xkm_wuq06qnr9rc
+  adhoc_filters:
+  - clause: WHERE
+    subject: pickup_datetime
+    operator: TEMPORAL_RANGE
+    comparator: No filter
+    expressionType: SIMPLE
+  size: count
+  max_bubble_size: '25'
+  color_scheme: supersetColors
+  show_legend: true
+  left_margin: auto
+  x_axis_format: SMART_NUMBER
+  x_ticks_layout: auto
+  bottom_margin: auto
+  y_axis_format: SMART_NUMBER
+  y_axis_bounds:
+  - null
+  - null
+  granularity_sqla: pickup_datetime
+  extra_form_data: {}
+  dashboards: []
+query_context: '{"datasource":{"id":8,"type":"table"},"force":false,"queries":[{"granularity":"pickup_datetime","filters":[{"col":"pickup_datetime","op":"TEMPORAL_RANGE","val":"No
+  filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":[{"expressionType":"SIMPLE","column":{"advanced_data_type":null,"changed_on":"2026-03-24T05:22:53.590340","column_name":"vpm","created_on":"2026-03-24T05:22:53.590338","description":null,"expression":null,"extra":null,"filterable":true,"groupby":true,"id":55,"is_active":true,"is_dttm":false,"python_date_format":null,"type":"NULLABLE(FLOAT64)","type_generic":null,"uuid":"5d1497fc-714c-4f2b-a50e-1c479c89cc82","verbose_name":null},"aggregate":"AVG","sqlExpression":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"AVG(vpm)","optionName":"metric_qdzh1l167tr_lixg6p1ud8o"},{"expressionType":"SIMPLE","column":{"advanced_data_type":null,"changed_on":"2026-03-24T05:22:53.590171","column_name":"vph","created_on":"2026-03-24T05:22:53.590169","description":null,"expression":null,"extra":null,"filterable":true,"groupby":true,"id":54,"is_active":true,"is_dttm":false,"python_date_format":null,"type":"NULLABLE(FLOAT64)","type_generic":null,"uuid":"a9c5895f-c967-4937-8698-18d5af7dccc3","verbose_name":null},"aggregate":"AVG","sqlExpression":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"AVG(vph)","optionName":"metric_du2t543xkm_wuq06qnr9rc"},"count"],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"8__table","viz_type":"bubble","entity":"pickup_hour","x":{"expressionType":"SIMPLE","column":{"advanced_data_type":null,"changed_on":"2026-03-24T05:22:53.590340","column_name":"vpm","created_on":"2026-03-24T05:22:53.590338","description":null,"expression":null,"extra":null,"filterable":true,"groupby":true,"id":55,"is_active":true,"is_dttm":false,"python_date_format":null,"type":"NULLABLE(FLOAT64)","type_generic":null,"uuid":"5d1497fc-714c-4f2b-a50e-1c479c89cc82","verbose_name":null},"aggregate":"AVG","sqlExpression":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"AVG(vpm)","optionName":"metric_qdzh1l167tr_lixg6p1ud8o"},"y":{"expressionType":"SIMPLE","column":{"advanced_data_type":null,"changed_on":"2026-03-24T05:22:53.590171","column_name":"vph","created_on":"2026-03-24T05:22:53.590169","description":null,"expression":null,"extra":null,"filterable":true,"groupby":true,"id":54,"is_active":true,"is_dttm":false,"python_date_format":null,"type":"NULLABLE(FLOAT64)","type_generic":null,"uuid":"a9c5895f-c967-4937-8698-18d5af7dccc3","verbose_name":null},"aggregate":"AVG","sqlExpression":null,"datasourceWarning":false,"hasCustomLabel":false,"label":"AVG(vph)","optionName":"metric_du2t543xkm_wuq06qnr9rc"},"adhoc_filters":[{"clause":"WHERE","subject":"pickup_datetime","operator":"TEMPORAL_RANGE","comparator":"No
+  filter","expressionType":"SIMPLE"}],"size":"count","max_bubble_size":"25","color_scheme":"supersetColors","show_legend":true,"left_margin":"auto","x_axis_format":"SMART_NUMBER","x_ticks_layout":"auto","bottom_margin":"auto","y_axis_format":"SMART_NUMBER","y_axis_bounds":[null,null],"granularity_sqla":"pickup_datetime","extra_form_data":{},"dashboards":[],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: fe82a26b-88ec-478a-aff9-4d93759aa64e
+version: 1.0.0
+dataset_uuid: 39508bdf-a6d8-42a3-92af-2d82e49f9ee1
