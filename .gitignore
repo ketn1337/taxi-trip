@@ -1,5 +1,5 @@
 .env
 data/*.parquet
 data/*.csv
-airflow/logs/
+airflow/logs
 airflow/dags/__pycache__

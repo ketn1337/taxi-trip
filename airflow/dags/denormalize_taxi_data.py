@@ -35,9 +35,11 @@ with DAG(
                     -- Time
                     pickup_datetime DateTime,
                     pickup_day UInt8,
+                    pickup_day_of_week UInt8,
                     pickup_hour UInt8,
                     dropoff_datetime DateTime,
                     dropoff_day UInt8,
+                    dropoff_day_of_week UInt8,
                     dropoff_hour UInt8,
 
                     -- Metrics
@@ -70,9 +72,11 @@ with DAG(
                         g.payment_type,
                         toDateTime(g.lpep_pickup_datetime) as pickup_datetime,
                         toDayOfMonth(pickup_datetime),
+                        toDayOfWeek(pickup_datetime),
                         toHour(pickup_datetime),
                         toDateTime(g.lpep_dropoff_datetime) as dropoff_datetime,
                         toDayOfMonth(dropoff_datetime),
+                        toDayOfWeek(dropoff_datetime),
                         toHour(dropoff_datetime),
                         g.passenger_count,
                         g.trip_distance,
@@ -99,9 +103,11 @@ with DAG(
                         y.payment_type,
                         toDateTime(y.tpep_pickup_datetime) as pickup_datetime,
                         toDayOfMonth(pickup_datetime),
+                        toDayOfWeek(pickup_datetime),
                         toHour(pickup_datetime),
                         toDateTime(y.tpep_dropoff_datetime) as dropoff_datetime,
                         toDayOfMonth(dropoff_datetime),
+                        toDayOfWeek(dropoff_datetime),
                         toHour(dropoff_datetime),
                         y.passenger_count,
                         y.trip_distance,
@@ -133,6 +139,16 @@ with DAG(
                 INSERT INTO dim_taxi_type VALUES
                 (1, 'Yellow'),
                 (2, 'Green');
+            """,
+            'dictionary': f"""
+                CREATE DICTIONARY IF NOT EXISTS default.dict_taxi_type (
+                    taxi_type_id UInt64,
+                    name String
+                )
+                PRIMARY KEY taxi_type_id
+                SOURCE(CLICKHOUSE(TABLE 'dim_taxi_type'))
+                LAYOUT(FLAT())
+                LIFETIME(0);
             """
         },
         'dim_vendor': {
@@ -151,6 +167,16 @@ with DAG(
                 (2, 'Curb Mobility, LLC'),
                 (6, 'Myle Technologies Inc'),
                 (7, 'Helix');
+            """,
+            'dictionary': f"""
+                CREATE DICTIONARY IF NOT EXISTS default.dict_vendor (
+                    vendor_id UInt64,
+                    name String
+                )
+                PRIMARY KEY vendor_id
+                SOURCE(CLICKHOUSE(TABLE 'dim_vendor'))
+                LAYOUT(FLAT())
+                LIFETIME(0);
             """
         },
         'dim_ratecode': {
@@ -172,6 +198,16 @@ with DAG(
                 (5, 'Negotiated fare'),
                 (6, 'Group ride'),
                 (99, 'Null/unknown');
+            """,
+            'dictionary': f"""
+                CREATE DICTIONARY IF NOT EXISTS default.dict_ratecode (
+                    ratecode_id UInt64,
+                    name String
+                )
+                PRIMARY KEY ratecode_id
+                SOURCE(CLICKHOUSE(TABLE 'dim_ratecode'))
+                LAYOUT(FLAT())
+                LIFETIME(0);
             """
         },
         'dim_location': {
@@ -189,7 +225,22 @@ with DAG(
             'insert': f"""
                 INSERT INTO dim_location
                 SELECT *
-                FROM taxi_zone;
+                FROM taxi_zone t
+                WHERE notEmpty(t.Zone) 
+                  AND notEmpty(t.Borough) 
+                  AND t.Borough != 'Unknown';
+            """,
+            'dictionary': f"""
+                CREATE DICTIONARY IF NOT EXISTS default.dict_location (
+                    location_id UInt64,
+                    borough String,
+                    zone String,
+                    service_zone String
+                )
+                PRIMARY KEY location_id
+                SOURCE(CLICKHOUSE(TABLE 'dim_location'))
+                LAYOUT(FLAT())
+                LIFETIME(0);
             """
         },
         'dim_payment': {
@@ -211,6 +262,16 @@ with DAG(
                 (4, 'Dispute'),
                 (5, 'Unknown'),
                 (6, 'Voided trip');
+            """,
+            'dictionary': f"""
+                CREATE DICTIONARY IF NOT EXISTS default.dict_payment (
+                    payment_id UInt64,
+                    payment_type String
+                )
+                PRIMARY KEY payment_id
+                SOURCE(CLICKHOUSE(TABLE 'dim_payment'))
+                LAYOUT(FLAT())
+                LIFETIME(0);
             """
         },
     }
@@ -231,18 +292,38 @@ with DAG(
             clickhouse_conn_id='clickhouse_default',
             sql=f"TRUNCATE TABLE IF EXISTS {table_name}"
         )
-
-        # 3. Задача вставки данных
-        insert_task = ClickHouseOperator(
-            task_id=f'insert_{table_name}',
-            clickhouse_conn_id='clickhouse_default',
-            sql=queries['insert']
-        ) if table_name != 'fact_trips' else [ClickHouseOperator(
-            task_id=f'insert_{table_name}_{i}',
-            clickhouse_conn_id='clickhouse_default',
-            sql=queries['insert'][i]
-        ) for i in ('yellow', 'green')]
             
+        if table_name != 'fact_trips':
 
-        # Выстраиваем зависимость внутри итерации:
-        create_task >> truncate_task >> insert_task
+            insert_task = ClickHouseOperator(
+                task_id=f'insert_{table_name}',
+                clickhouse_conn_id='clickhouse_default',
+                sql=queries['insert']
+            )
+
+            create_dictionary = ClickHouseOperator(
+                task_id=f'create_dictionary_{table_name[4:]}',
+                clickhouse_conn_id='clickhouse_default',
+                sql=queries['dictionary']
+            )
+
+            reload_dictionary = ClickHouseOperator(
+                task_id=f'reload_dictionary_{table_name[4:]}',
+                clickhouse_conn_id='clickhouse_default',
+                sql=f'''
+                    SYSTEM RELOAD DICTIONARY default.dict_{table_name[4:]};
+                '''
+            )
+
+            create_task >> truncate_task >> insert_task >> create_dictionary >> reload_dictionary
+
+        else:
+            insert_task = [
+                ClickHouseOperator(
+                    task_id=f'insert_{table_name}_{i}',
+                    clickhouse_conn_id='clickhouse_default',
+                    sql=queries['insert'][i]
+                ) for i in ('yellow', 'green')
+            ]
+
+            create_task >> truncate_task >> insert_task
